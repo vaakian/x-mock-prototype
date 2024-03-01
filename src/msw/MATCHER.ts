@@ -14,15 +14,16 @@ export const jsonPlaceholderInterception: InterceptionDescriptor = {
       handler: async (response) => {
         // this script can be written in a separate file
         const script = `
-          const immediate = async () => {
+          const asyncWrapper = async () => {
             const data = JSON.parse(response);
             const res = await fetch("https://jsonplaceholder.typicode.com/todos/3").then((res) => res.json())
             return JSON.stringify({ ...res, title: 'modified title'});
           }
-          return immediate();
+          return asyncWrapper();
         `;
 
         // provide a context
+        // todo: XMLHttpRequest, fetch, etc.
         const fn = new Function("response", "fetch", script);
         return await fn(response, nativeFetch);
       },
