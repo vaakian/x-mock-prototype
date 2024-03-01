@@ -1,6 +1,7 @@
 import { HttpRequestEventMap } from "@mswjs/interceptors";
 import { logger, nativeFetch } from "./type";
 import { jsonPlaceholderInterception } from "./MATCHER";
+import { waitFor } from "./utils";
 
 export async function requestHandler({
   request,
@@ -20,7 +21,7 @@ export async function requestHandler({
 
     // delaying
     if (rule.delay) {
-      await new Promise((resolve) => setTimeout(resolve, rule.delay));
+      await waitFor(rule.delay);
     }
 
     // text response
@@ -30,9 +31,9 @@ export async function requestHandler({
 
     // modify response
     if ("handler" in rule) {
-      const data = await nativeFetch(request).then((res) => res.text());
-      const processedData = await rule.handler(data);
-      request.respondWith(new Response(processedData));
+      const response = await nativeFetch(request).then((res) => res.text());
+      const processedResponse = await rule.handler(request, response);
+      request.respondWith(new Response(processedResponse));
     }
   }
 }

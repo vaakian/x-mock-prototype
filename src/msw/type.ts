@@ -1,3 +1,5 @@
+import { HttpRequestEventMap } from "@mswjs/interceptors";
+
 export const logger = console.info;
 export const nativeFetch = window.fetch;
 
@@ -7,6 +9,7 @@ export type BaseRule<T> = {
   matcher: Matcher;
   enabled: boolean;
   delay?: number;
+  status?: number;
 } & T;
 
 export type Rule =
@@ -14,7 +17,10 @@ export type Rule =
       response: string;
     }>
   | BaseRule<{
-      handler: (response: string) => Awaitable<string>;
+      handler: (
+        request: HttpRequestEventMap["request"][0]["request"],
+        response: string
+      ) => Awaitable<string>;
     }>;
 
 export type InterceptionDescriptor = {

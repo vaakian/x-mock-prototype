@@ -9,9 +9,9 @@ export const jsonPlaceholderInterception: InterceptionDescriptor = {
   url: "https://jsonplaceholder.typicode.com/todos",
   rules: [
     {
-      matcher: (request) => request.url.includes("todos/2"),
+      matcher: (request) => request.url.includes("todos/1"),
       enabled: true,
-      handler: async (response) => {
+      handler: async (request, response) => {
         // this script can be written in a separate file
         const script = `
           const asyncWrapper = async () => {
@@ -24,8 +24,8 @@ export const jsonPlaceholderInterception: InterceptionDescriptor = {
 
         // provide a context
         // todo: XMLHttpRequest, fetch, etc.
-        const fn = new Function("response", "fetch", script);
-        return await fn(response, nativeFetch);
+        const fn = new Function("request", "response", "fetch", script);
+        return await fn(request, response, nativeFetch);
       },
     },
     {
