@@ -12,19 +12,23 @@ export const jsonPlaceholderInterception: InterceptionDescriptor = {
       matcher: (request) => request.url.includes("todos/1"),
       enabled: true,
       handler: async (request, response) => {
-        // this script can be written in a separate file
-        const script = `
+        // provide a context
+        // todo: XMLHttpRequest, fetch, etc.
+        const fn = new Function(
+          // the params
+          "request",
+          "response",
+          "fetch",
+          // the script
+          // todo: can be written in a separate file
+          `
           const asyncWrapper = async () => {
             const data = JSON.parse(response);
             const res = await fetch("https://jsonplaceholder.typicode.com/todos/3").then((res) => res.json())
             return JSON.stringify({ ...res, title: 'modified title with original server response' });
           }
-          return asyncWrapper();
-        `;
-
-        // provide a context
-        // todo: XMLHttpRequest, fetch, etc.
-        const fn = new Function("request", "response", "fetch", script);
+          return asyncWrapper();`
+        );
         return await fn(request, response, nativeFetch);
       },
     },
