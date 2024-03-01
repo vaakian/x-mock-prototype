@@ -9,7 +9,7 @@ export const jsonPlaceholderInterception: InterceptionDescriptor = {
   url: "https://jsonplaceholder.typicode.com/todos",
   rules: [
     {
-      matcher: (request) => request.url.includes("todos/1"),
+      matcher: (request) => request.url.includes("todos/2"),
       enabled: true,
       handler: async (response) => {
         // this script can be written in a separate file
@@ -17,7 +17,7 @@ export const jsonPlaceholderInterception: InterceptionDescriptor = {
           const asyncWrapper = async () => {
             const data = JSON.parse(response);
             const res = await fetch("https://jsonplaceholder.typicode.com/todos/3").then((res) => res.json())
-            return JSON.stringify({ ...res, title: 'modified title'});
+            return JSON.stringify({ ...res, title: 'modified title with original server response' });
           }
           return asyncWrapper();
         `;
@@ -34,7 +34,7 @@ export const jsonPlaceholderInterception: InterceptionDescriptor = {
       response: JSON.stringify({
         userId: 1,
         id: 1,
-        title: "delectus aut autem",
+        title: "plain text response without requesting the original server",
         completed: false,
         aaa: 456,
       }),
