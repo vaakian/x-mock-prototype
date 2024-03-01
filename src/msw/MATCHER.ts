@@ -31,6 +31,7 @@ export const jsonPlaceholderInterception: InterceptionDescriptor = {
     {
       matcher: MATCHER.METHOD_GET,
       enabled: true,
+      delay: 1200,
       response: JSON.stringify({
         userId: 1,
         id: 1,

@@ -7,11 +7,13 @@ export type Rule =
   | {
       matcher: Matcher;
       enabled: boolean;
+      delay?: number;
       response: string;
     }
   | {
       matcher: Matcher;
       enabled: boolean;
+      delay?: number;
       handler: (response: string) => Awaitable<string>;
     };
 

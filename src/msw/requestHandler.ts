@@ -18,6 +18,11 @@ export async function requestHandler({
   if (rule?.matcher(request)) {
     logger("MATCHED", request.url, rule);
 
+    // delaying
+    if (rule.delay) {
+      await new Promise((resolve) => setTimeout(resolve, rule.delay));
+    }
+
     // text response
     if ("response" in rule) {
       request.respondWith(new Response(rule.response));
