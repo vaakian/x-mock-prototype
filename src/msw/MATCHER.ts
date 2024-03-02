@@ -1,11 +1,11 @@
 import { Matcher, InterceptionDescriptor, nativeFetch } from "./type";
 
-export const MATCHER = {
+export const BUILT_IN_MATCHER = {
   METHOD_GET: ((request) => request.method === "GET") as Matcher,
   METHOD_POST: ((request) => request.method === "POST") as Matcher,
 } as const;
 
-export const jsonPlaceholderInterception: InterceptionDescriptor = {
+export const jsonPlaceholderDescriptor: InterceptionDescriptor = {
   url: "https://jsonplaceholder.typicode.com/todos",
   rules: [
     {
@@ -33,16 +33,29 @@ export const jsonPlaceholderInterception: InterceptionDescriptor = {
       },
     },
     {
-      matcher: MATCHER.METHOD_GET,
+      matcher: (request) => {
+        const url = new URL(request.url);
+        return url.searchParams.get("foo") === "bar";
+      },
       enabled: true,
-      delay: 1200,
       response: JSON.stringify({
-        userId: 1,
-        id: 1,
-        title: "plain text response without requesting the original server",
-        completed: false,
-        aaa: 456,
+        message: "fake response from searchParams foo=bar match",
       }),
+      delay: 1000,
     },
+    // {
+    //   matcher: BUILT_IN_MATCHER.METHOD_GET,
+    //   enabled: true,
+    //   delay: 1200,
+    //   response: JSON.stringify({
+    //     userId: 1,
+    //     id: 1,
+    //     title: "plain text response without requesting the original server",
+    //     completed: false,
+    //     aaa: 456,
+    //   }),
+    // },
   ],
 };
+
+export const descriptors = [jsonPlaceholderDescriptor];

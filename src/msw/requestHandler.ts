@@ -1,6 +1,6 @@
 import { HttpRequestEventMap } from "@mswjs/interceptors";
 import { logger, nativeFetch } from "./type";
-import { jsonPlaceholderInterception } from "./MATCHER";
+import { descriptors } from "./MATCHER";
 import { waitFor } from "./utils";
 
 export async function requestHandler({
@@ -8,15 +8,25 @@ export async function requestHandler({
 }: HttpRequestEventMap["request"][0]) {
   const urlObject = new URL(request.url);
   const urlWithoutQuery = urlObject.origin + urlObject.pathname;
-  // todo: use feather-router to match the url
-  if (!urlWithoutQuery.startsWith(jsonPlaceholderInterception.url)) return;
 
-  // find the first rule that matches the request
-  const rule = jsonPlaceholderInterception.rules.find(
+  // step 1: find the descriptor that matches the url
+  // todo: use feather-router to match the url
+  const currentDescriptor = descriptors.find((descriptor) =>
+    urlWithoutQuery.startsWith(descriptor.url)
+  );
+  if (!currentDescriptor) return;
+
+  // step 2: find the first rule that matches the request
+  const rule = currentDescriptor.rules.find(
     (rule) => rule.enabled && rule.matcher(request)
   );
 
-  if (rule?.matcher(request)) {
+  // url is match but no available rule is found
+  if (!rule) {
+    return;
+  }
+
+  if (rule.matcher(request)) {
     logger("MATCHED", request.url, rule);
 
     // delaying
