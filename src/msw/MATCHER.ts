@@ -3,6 +3,7 @@ import { Matcher, InterceptionDescriptor, nativeFetch } from "./type";
 export const BUILT_IN_MATCHER = {
   METHOD_GET: ((request) => request.method === "GET") as Matcher,
   METHOD_POST: ((request) => request.method === "POST") as Matcher,
+  METHOD_DELETE: ((request) => request.method === "DELETE") as Matcher,
 } as const;
 
 export const jsonPlaceholderDescriptor: InterceptionDescriptor = {
@@ -43,19 +44,43 @@ export const jsonPlaceholderDescriptor: InterceptionDescriptor = {
       }),
       delay: 1000,
     },
-    // {
-    //   matcher: BUILT_IN_MATCHER.METHOD_GET,
-    //   enabled: true,
-    //   delay: 1200,
-    //   response: JSON.stringify({
-    //     userId: 1,
-    //     id: 1,
-    //     title: "plain text response without requesting the original server",
-    //     completed: false,
-    //     aaa: 456,
-    //   }),
-    // },
+    {
+      matcher: BUILT_IN_MATCHER.METHOD_DELETE,
+      enabled: true,
+      delay: 1200,
+      response: JSON.stringify({
+        message: "deleted",
+      }),
+    },
   ],
 };
 
-export const descriptors = [jsonPlaceholderDescriptor];
+export const createDescriptorStorage = () => {
+  const descriptors = new Set<InterceptionDescriptor>();
+
+  const add = (descriptor: InterceptionDescriptor) =>
+    descriptors.add(descriptor);
+
+  const remove = (descriptor: InterceptionDescriptor) =>
+    descriptors.delete(descriptor);
+
+  const clear = () => descriptors.clear();
+
+  const get = (request: Request) => {
+    return Array.from(descriptors).find((descriptor) => {
+      const urlObject = new URL(request.url);
+      const urlWithoutQuery = urlObject.origin + urlObject.pathname;
+      return urlWithoutQuery.startsWith(descriptor.url);
+    });
+  };
+
+  return {
+    add,
+    remove,
+    clear,
+    get,
+    descriptors,
+  };
+};
+
+export type DescriptorStorage = ReturnType<typeof createDescriptorStorage>;

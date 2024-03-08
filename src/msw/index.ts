@@ -2,7 +2,8 @@ import { BatchInterceptor } from "@mswjs/interceptors";
 
 import { XMLHttpRequestInterceptor } from "@mswjs/interceptors/XMLHttpRequest";
 import { FetchInterceptor } from "@mswjs/interceptors/fetch";
-import { requestHandler } from "./requestHandler";
+import { createDescriptorStorage, jsonPlaceholderDescriptor } from "./MATCHER";
+import { createRequestHandler } from "./requestHandler";
 
 const interceptor = new BatchInterceptor({
   name: "x-interceptor",
@@ -11,5 +12,9 @@ const interceptor = new BatchInterceptor({
 
 export default function init() {
   interceptor.apply();
+
+  const descriptorStorage = createDescriptorStorage();
+  descriptorStorage.add(jsonPlaceholderDescriptor);
+  const requestHandler = createRequestHandler(descriptorStorage);
   interceptor.on("request", requestHandler);
 }

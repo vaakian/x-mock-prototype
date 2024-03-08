@@ -1,5 +1,6 @@
 import { useAsync } from "react-use";
 import "./App.css";
+import { useEffect } from "react";
 
 function App() {
   const demo1 = useAsync(async () => {
@@ -12,6 +13,12 @@ function App() {
       (response) => response.json()
     );
   });
+
+  useEffect(() => {
+    fetch("https://jsonplaceholder.typicode.com/todos/4", { method: "DELETE" })
+      .then((res) => res.json())
+      .then(console.log);
+  }, []);
   return (
     <div>
       <div>loading: {String(demo1.loading)}</div>
